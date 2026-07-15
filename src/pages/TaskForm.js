@@ -28,12 +28,14 @@ const TaskForm = () => {
     e.preventDefault();
     const taskData = { title, description, status, priority };
     const config = { headers: { Authorization: `Bearer ${token}` } };
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+ 
     try {
       if (id) {
-        await axios.put(`http://localhost:5000/api/tasks/${id}`, taskData, config);
+        await axios.put(`${API_BASE_URL}/api/tasks/${id}`, taskData, config);
       } else {
-        await axios.post('http://localhost:5000/api/tasks', taskData, config);
+        await axios.post('${API_BASE_URL}/api/tasks', taskData, config);
       }
       navigate('/');
     } catch (err) {
