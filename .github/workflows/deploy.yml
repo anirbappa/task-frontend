@@ -33,7 +33,6 @@ jobs:
 
   build-and-ship:
     needs: validate-and-test
-    # Only push and publish to Docker Hub if the code has been merged/pushed into main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -49,8 +48,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-
-      # FOR FRONTEND REPOSITORY BUILD:
+      # FOR FRONTEND REPOSITORY DOCKER BUILD:
       - name: Build and Push Frontend Container (With Secrets Injection)
         if: github.event.repository.name == 'task-frontend'
         uses: docker/build-push-action@v5
@@ -60,8 +58,22 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/task-frontend:latest
           build-args: |
             REACT_APP_API_URL=http://${{ secrets.BACKEND_IP }}:5000
-             run: npm run build
 
+      - name: Setup Node.js Runtime Environment (Host)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Application Dependencies (Host)
+        run: npm ci || npm install
+
+      - name: Generate Production Build Assets (Host)
+        run: npm run build
+        env:
+          REACT_APP_API_URL: http://${{ secrets.BACKEND_IP }}:5000
+
+      # AWS S3 DEPLOYMENT:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -73,4 +85,3 @@ jobs:
         run: |
           # Syncs the compiled 'build' folder to S3 and removes deleted files automatically
           aws s3 sync build/ s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete
-
