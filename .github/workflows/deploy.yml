@@ -60,3 +60,17 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/task-frontend:latest
           build-args: |
             REACT_APP_API_URL=http://${{ secrets.BACKEND_IP }}:5000
+             run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync Build Assets to AWS S3
+        run: |
+          # Syncs the compiled 'build' folder to S3 and removes deleted files automatically
+          aws s3 sync build/ s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete
+
