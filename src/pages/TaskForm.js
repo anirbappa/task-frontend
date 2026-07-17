@@ -35,7 +35,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       if (id) {
         await axios.put(`${API_BASE_URL}/api/tasks/${id}`, taskData, config);
       } else {
-        await axios.post('${API_BASE_URL}/api/tasks', taskData, config);
+        await axios.post(`${API_BASE_URL}/api/tasks`, taskData, config);
       }
       navigate('/');
     } catch (err) {

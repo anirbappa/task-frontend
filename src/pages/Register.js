@@ -16,7 +16,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('${API_BASE_URL}/api/auth/register', formData);
+      const res = await axios.post(`${API_BASE_URL}/api/auth/register`, formData);
       login(res.data.user, res.data.token);
       navigate('/');
     } catch (err) {
